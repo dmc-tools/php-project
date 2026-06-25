@@ -3,9 +3,9 @@
  * Database Configuration for Singapore GST e-Invoicing Application
  */
 $host = 'localhost';
-$db   = 'digitrainerco_enterprise_os';
-$user = 'digitrainerco_gym';
-$pass = 'r68_6ddrUY9@X3G;';
+$db   = 'dharmesh_enterprise_os';
+$user = 'dharmesh_ashui';
+$pass = 'kvz_yVe@CqPVQ1E2';
 $charset = 'utf8mb4';
 
 // Check if local connection fails

@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    RewriteBase /repositories/php-project/
     
     # Do not rewrite if the request is for an existing file or directory
     RewriteCond %{REQUEST_FILENAME} !-f

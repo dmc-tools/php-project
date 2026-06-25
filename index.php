@@ -78,9 +78,10 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : '';
     window.PHP_ENV = {
       db_connected: <?php echo $db_connected ? 'true' : 'false'; ?>,
       db_error: <?php echo json_encode($db_error); ?>,
-      api_url: 'api.php',
+      api_url: <?php echo json_encode(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/api.php'); ?>,
       legal_name: 'Singapore Enterprise Solutions',
-      page: <?php echo json_encode($current_page); ?>
+      page: <?php echo json_encode($current_page); ?>,
+      base_path: <?php echo json_encode(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\')); ?>
     };
   </script>
 </head>
@@ -248,16 +249,20 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : '';
       await syncData();
 
       const path = window.location.pathname;
+      const base = window.PHP_ENV?.base_path || '';
+      const loginPath = base + '/login';
+
       if (!AppState.isAuthenticated) {
-        if (path !== '/login') {
-          window.history.replaceState({ view: 'LOGIN' }, '', '/login');
+        if (path !== loginPath) {
+          window.history.replaceState({ view: 'LOGIN' }, '', loginPath);
         }
         AppState.currentView = 'LOGIN';
       } else {
         let mappedView = window.PHP_ENV?.page || getPathView(path);
         // If they requested root or login while authenticated, route to their default view
-        if (path === '/login' || path === '/') {
-          if (path === '/login') mappedView = (AppState.user.role === 'DEVELOPER' ? 'DEV_CONSOLE' : 'DASHBOARD');
+        const rootPath = base + '/';
+        if (path === loginPath || path === rootPath || path === base) {
+          if (path === loginPath) mappedView = (AppState.user.role === 'DEVELOPER' ? 'DEV_CONSOLE' : 'DASHBOARD');
           window.history.replaceState({ view: mappedView }, '', getViewPath(mappedView));
         } else if (path !== getViewPath(mappedView)) {
           window.history.replaceState({ view: mappedView }, '', getViewPath(mappedView));
@@ -305,31 +310,35 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : '';
     }
 
     function getViewPath(view) {
-      if (view === 'DASHBOARD') return '/dashboard';
-      if (view === 'PRODUCTS') return '/products';
-      if (view === 'SALES_LIST') return '/sales-list';
-      if (view === 'CUSTOMER_LIST') return '/customer-list';
-      if (view === 'INVOICE_LIST') return '/invoice-list';
-      if (view === 'COMMISSION_LIST') return '/commission-list';
-      if (view === 'TAX_RATE_LIST') return '/tax-rate-list';
-      if (view === 'COMPANY_SETTINGS') return '/company-settings';
-      if (view === 'USER_LIST') return '/user-list';
-      if (view === 'DEV_CONSOLE') return '/dev-console';
-      if (view === 'LOGIN') return '/login';
-      return '/';
+      const base = window.PHP_ENV?.base_path || '';
+      if (view === 'DASHBOARD') return base + '/dashboard';
+      if (view === 'PRODUCTS') return base + '/products';
+      if (view === 'SALES_LIST') return base + '/sales-list';
+      if (view === 'CUSTOMER_LIST') return base + '/customer-list';
+      if (view === 'INVOICE_LIST') return base + '/invoice-list';
+      if (view === 'COMMISSION_LIST') return base + '/commission-list';
+      if (view === 'TAX_RATE_LIST') return base + '/tax-rate-list';
+      if (view === 'COMPANY_SETTINGS') return base + '/company-settings';
+      if (view === 'USER_LIST') return base + '/user-list';
+      if (view === 'DEV_CONSOLE') return base + '/dev-console';
+      if (view === 'LOGIN') return base + '/login';
+      return base + '/';
     }
 
     function getPathView(path) {
-      if (path === '/products') return 'PRODUCTS';
-      if (path === '/sales-list') return 'SALES_LIST';
-      if (path === '/customer-list') return 'CUSTOMER_LIST';
-      if (path === '/invoice-list') return 'INVOICE_LIST';
-      if (path === '/commission-list') return 'COMMISSION_LIST';
-      if (path === '/tax-rate-list') return 'TAX_RATE_LIST';
-      if (path === '/company-settings') return 'COMPANY_SETTINGS';
-      if (path === '/user-list') return 'USER_LIST';
-      if (path === '/dev-console') return 'DEV_CONSOLE';
-      if (path === '/login') return 'LOGIN';
+      const base = window.PHP_ENV?.base_path || '';
+      const relativePath = path.startsWith(base) ? path.substring(base.length) : path;
+
+      if (relativePath === '/products') return 'PRODUCTS';
+      if (relativePath === '/sales-list') return 'SALES_LIST';
+      if (relativePath === '/customer-list') return 'CUSTOMER_LIST';
+      if (relativePath === '/invoice-list') return 'INVOICE_LIST';
+      if (relativePath === '/commission-list') return 'COMMISSION_LIST';
+      if (relativePath === '/tax-rate-list') return 'TAX_RATE_LIST';
+      if (relativePath === '/company-settings') return 'COMPANY_SETTINGS';
+      if (relativePath === '/user-list') return 'USER_LIST';
+      if (relativePath === '/dev-console') return 'DEV_CONSOLE';
+      if (relativePath === '/login') return 'LOGIN';
       return 'DASHBOARD';
     }
 
@@ -361,13 +370,16 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : '';
     }
 
     window.addEventListener('popstate', (e) => {
+      const base = window.PHP_ENV?.base_path || '';
       if (!AppState.isAuthenticated) {
         navigate('LOGIN', null, null, true);
       } else if (e.state && e.state.view) {
         navigate(e.state.view, null, null, true);
       } else {
         const path = window.location.pathname;
-        if (path === '/login' || path === '/') {
+        const loginPath = base + '/login';
+        const rootPath = base + '/';
+        if (path === loginPath || path === rootPath || path === base) {
           navigate('DASHBOARD', null, null, true);
         } else {
           navigate(getPathView(path), null, null, true);
