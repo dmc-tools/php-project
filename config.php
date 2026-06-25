@@ -23,7 +23,7 @@ try {
 
 if ($connection_failed) {
     // If connection fails, fetch configuration from remote config URL
-    $remote_config_url = 'http://digitrainer.co.in/aicrm/Accounting-App-Surch/config.php';
+    $remote_config_url = 'http://digitrainer.co.in/aicrm/Accounting-App-Surch/api.php';
     
     // Set context options with timeout
     $context = stream_context_create([
