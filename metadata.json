@@ -1,0 +1,10 @@
+{
+  "name": "Remix: Ashui.surch.com.sg : Enterprise Account Software Current",
+  "description": "A high-performance product management module for company invoicing systems, featuring inventory tracking and price management.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
